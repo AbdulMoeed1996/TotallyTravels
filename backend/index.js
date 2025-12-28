@@ -1,10 +1,3 @@
-/**
- * Vercel-ready Express backend (serverless)
- *
- * - Exports the Express app (no app.listen here)
- * - Keeps routes exactly as your frontend expects: /api/contact, /api/book, /api/weather
- */
-
 require('dotenv').config();
 
 const express = require('express');
@@ -14,14 +7,12 @@ const fetch = require('node-fetch'); // v2
 
 const app = express();
 
-/* ------------------- CORS (dev + prod) ------------------- */
+/* ------------------- CORS ------------------- */
 const defaultAllowedOrigins = [
   'https://totallytravels.com',
   'https://www.totallytravels.com',
 ];
 
-// Optional: set ALLOWED_ORIGINS in Vercel (comma-separated)
-// Example: https://totallytravels.com,https://www.totallytravels.com,https://yourcpanel-temporary-url.com
 const envAllowedOrigins = (process.env.ALLOWED_ORIGINS || '')
   .split(',')
   .map((s) => s.trim())
@@ -31,17 +22,11 @@ const allowedProdOrigins = new Set([...defaultAllowedOrigins, ...envAllowedOrigi
 
 const corsOptions = {
   origin: (origin, cb) => {
-    // Allow server-to-server, curl, postman, etc.
     if (!origin) return cb(null, true);
-
-    // Allow any localhost port (Vite changes ports)
     if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
       return cb(null, true);
     }
-
-    // Allow configured production domains
     if (allowedProdOrigins.has(origin)) return cb(null, true);
-
     return cb(new Error(`CORS blocked for origin: ${origin}`));
   },
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -52,37 +37,147 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 
-/* ------------------- Email (Nodemailer / Gmail SMTP) ------------------- */
+/* ------------------- Email ------------------- */
 const MAIL_USER = process.env.GMAIL_USER;
 const MAIL_PASS = process.env.GMAIL_PASS;
-
-// Where enquiries/booking requests should be delivered.
-// Defaults to the authenticated Gmail address.
 const CONTACT_TO = process.env.CONTACT_TO || MAIL_USER;
 
 function emailIsConfigured() {
   return Boolean(MAIL_USER && MAIL_PASS && CONTACT_TO);
 }
 
-// Vercel blocks outbound SMTP on port 25, but other ports are generally fine.
-// If SMTP ever becomes unreliable, switch to an email API provider instead. :contentReference[oaicite:1]{index=1}
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
-  secure: false, // STARTTLS
-  auth: {
-    user: MAIL_USER,
-    pass: MAIL_PASS,
-  },
+  secure: false,
+  auth: { user: MAIL_USER, pass: MAIL_PASS },
 });
 
-/* ------------------- Health check ------------------- */
+/* ------------------- Helpers ------------------- */
+function toCleanString(v) {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'string') return v.trim();
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+  return '';
+}
+
+/**
+ * Pretty format for date-only values:
+ * "2026-01-05" -> "05 Jan 2026"
+ *
+ * Uses UTC to avoid timezone shifting the date.
+ */
+function formatPrettyDate(dateStr) {
+  const s = toCleanString(dateStr);
+  if (!s) return '';
+
+  // Match YYYY-MM-DD
+  const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const dt = new Date(`${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}T00:00:00Z`);
+    // "05 Jan 2026"
+    return new Intl.DateTimeFormat('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(dt);
+  }
+
+  // If it isn't ISO, just return original string
+  return s;
+}
+
+/**
+ * Creates a nice "Preferred Dates" string from:
+ * - dates: "2026-01-01 to 2026-01-05"
+ * - dates: { startDate, endDate }
+ * - startDate/endDate on body
+ * - dates: ["2026-01-01","2026-01-05"]
+ */
+function formatPreferredDates(body) {
+  const direct = body?.dates;
+
+  // 1) dates as string: try to extract ISO dates from it
+  if (typeof direct === 'string') {
+    const raw = direct.trim();
+    const matches = raw.match(/\d{4}-\d{2}-\d{2}/g);
+    if (matches && matches.length >= 2) {
+      const start = formatPrettyDate(matches[0]);
+      const end = formatPrettyDate(matches[1]);
+      if (start && end) return `${start} to ${end}`;
+      if (start) return start;
+      if (end) return end;
+    }
+    if (matches && matches.length === 1) {
+      const one = formatPrettyDate(matches[0]);
+      return one || raw;
+    }
+    return raw;
+  }
+
+  // 2) dates as object
+  if (direct && typeof direct === 'object' && !Array.isArray(direct)) {
+    const s = toCleanString(direct.startDate || direct.start || body?.startDate);
+    const e = toCleanString(direct.endDate || direct.end || body?.endDate);
+
+    const start = formatPrettyDate(s);
+    const end = formatPrettyDate(e);
+
+    if (start && end) return `${start} to ${end}`;
+    if (start) return start;
+    if (end) return end;
+  }
+
+  // 3) dates as array
+  if (Array.isArray(direct)) {
+    const parts = direct.map((x) => toCleanString(x)).filter(Boolean);
+    const start = formatPrettyDate(parts[0]);
+    const end = formatPrettyDate(parts[1]);
+
+    if (start && end) return `${start} to ${end}`;
+    if (start) return start;
+  }
+
+  // 4) fallback to top-level startDate/endDate
+  const startDate = formatPrettyDate(body?.startDate);
+  const endDate = formatPrettyDate(body?.endDate);
+
+  if (startDate && endDate) return `${startDate} to ${endDate}`;
+  if (startDate) return startDate;
+  if (endDate) return endDate;
+
+  return '';
+}
+
+function normalizeDestinations(body) {
+  const d1 = body?.destinations;
+  if (typeof d1 === 'string') return d1.trim();
+  if (Array.isArray(d1)) return d1.map((x) => toCleanString(x)).filter(Boolean).join(', ');
+  const d2 = body?.destination;
+  if (typeof d2 === 'string') return d2.trim();
+  if (Array.isArray(d2)) return d2.map((x) => toCleanString(x)).filter(Boolean).join(', ');
+  return '';
+}
+
+function normalizeTravelers(body) {
+  const t =
+    body?.travelers ??
+    body?.numberOfPeople ??
+    body?.travellers ??
+    body?.people;
+
+  const n = Number(t);
+  if (Number.isFinite(n) && n > 0) return n;
+  return '';
+}
+
+/* ------------------- Health ------------------- */
 app.get('/', (_req, res) => {
   res.send('Totally Travels backend is running');
 });
 
-/* ------------------- CONTACT FORM ------------------- */
-// Expects: { name, email, message }
+/* ------------------- CONTACT ------------------- */
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, message } = req.body || {};
@@ -101,7 +196,7 @@ app.post('/api/contact', async (req, res) => {
       });
     }
 
-    const mailOptions = {
+    await transporter.sendMail({
       from: `"Totally Travels Website" <${MAIL_USER}>`,
       to: CONTACT_TO,
       replyTo: email,
@@ -115,9 +210,8 @@ Email: ${email}
 Message:
 ${message}
       `.trim(),
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
     return res.json({ success: true });
   } catch (err) {
     console.error('Error in /api/contact:', err);
@@ -125,13 +219,20 @@ ${message}
   }
 });
 
-/* ------------------- BOOK TOUR FORM ------------------- */
-// Expects: { name, email, phone, dates, destinations, travelers, message }
+/* ------------------- BOOK ------------------- */
 app.post('/api/book', async (req, res) => {
   try {
-    const { name, email, phone, dates, destinations, travelers, message } = req.body || {};
+    const body = req.body || {};
 
-    if (!name || !email || !phone || !dates || !destinations || !travelers) {
+    const name = toCleanString(body.name);
+    const email = toCleanString(body.email);
+    const phone = toCleanString(body.phone);
+
+    const preferredDates = formatPreferredDates(body);
+    const destinationsText = normalizeDestinations(body);
+    const travelers = normalizeTravelers(body);
+
+    if (!name || !email || !phone || !destinationsText || !preferredDates || !travelers) {
       return res.status(400).json({
         success: false,
         error: 'Missing required fields: name, email, phone, dates, destinations, travelers',
@@ -145,11 +246,9 @@ app.post('/api/book', async (req, res) => {
       });
     }
 
-    const destinationText = Array.isArray(destinations)
-      ? destinations.join(', ')
-      : String(destinations);
+    const message = toCleanString(body.message) || '(No additional message)';
 
-    const mailOptions = {
+    await transporter.sendMail({
       from: `"Totally Travels Website" <${MAIL_USER}>`,
       to: CONTACT_TO,
       replyTo: email,
@@ -160,16 +259,15 @@ New booking request:
 Name: ${name}
 Email: ${email}
 Phone: ${phone}
-Preferred Dates: ${dates}
-Destinations: ${destinationText}
+Preferred Dates: ${preferredDates}
+Destinations: ${destinationsText}
 Number of Travelers: ${travelers}
 
 Message:
-${message || '(No additional message)'}
+${message}
       `.trim(),
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
     return res.json({ success: true });
   } catch (err) {
     console.error('Error in /api/book:', err);
@@ -177,14 +275,7 @@ ${message || '(No additional message)'}
   }
 });
 
-/* ------------------- WEATHER API ------------------- */
-/**
- * Supported:
- * - GET /api/weather?city=lahore
- * - GET /api/weather?q=Fairy%20Meadows,%20Pakistan
- * - GET /api/weather?lat=35.2976&lon=75.6333
- */
-
+/* ------------------- WEATHER ------------------- */
 const CITY_COORDS = {
   lahore: { latitude: 31.5204, longitude: 74.3587, label: 'Lahore, Pakistan' },
   hunza: { latitude: 36.3167, longitude: 74.65, label: 'Hunza, Pakistan' },
@@ -227,11 +318,10 @@ function weatherCodeToText(code) {
   }
 }
 
-/* Simple in-memory caches (works per-serverless-instance) */
-const geocodeCache = new Map(); // key: q -> { ts, value }
-const weatherCache = new Map(); // key: "lat,lon" -> { ts, value }
-const GEOCODE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
-const WEATHER_TTL_MS = 5 * 60 * 1000; // 5 min
+const geocodeCache = new Map();
+const weatherCache = new Map();
+const GEOCODE_TTL_MS = 24 * 60 * 60 * 1000;
+const WEATHER_TTL_MS = 5 * 60 * 1000;
 
 function cacheGet(map, key, ttlMs) {
   const hit = map.get(key);
@@ -266,7 +356,6 @@ async function geocodePlace(placeName) {
     return null;
   }
 
-  // Prefer Pakistan results if present
   const pkHit =
     results.find((r) => String(r.country_code || '').toUpperCase() === 'PK') ||
     results.find((r) => String(r.country || '').toLowerCase() === 'pakistan');
@@ -377,5 +466,4 @@ app.use((err, _req, res, next) => {
   return next(err);
 });
 
-// IMPORTANT: export the app for Vercel
 module.exports = app;
