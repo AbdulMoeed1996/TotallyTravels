@@ -1,0 +1,135 @@
+/* Destination Cards — aligned grid + modern button */
+
+.tt-dcard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 14px 30px rgba(17, 24, 39, 0.08);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.tt-dcard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px rgba(17, 24, 39, 0.12);
+}
+
+.tt-dcard-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  overflow: hidden;
+}
+
+.tt-dcard-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 450ms ease;
+}
+
+.tt-dcard:hover .tt-dcard-media img {
+  transform: scale(1.045);
+}
+
+.tt-dcard-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(2, 6, 23, 0.35), rgba(2, 6, 23, 0.0) 55%);
+  pointer-events: none;
+}
+
+.tt-dcard-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(15, 23, 42, 0.65);
+  font-weight: 700;
+}
+
+.tt-dcard-placeholder-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.tt-dcard-body {
+  padding: 1.05rem 1.15rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  flex: 1;
+}
+
+.tt-dcard-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+}
+
+.tt-dcard-desc {
+  margin: 0;
+  color: #475569;
+  line-height: 1.65;
+
+  /* Clamp so all cards align nicely even if text differs */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* adjust 3/4 if you want */
+  overflow: hidden;
+  min-height: calc(1.65em * 3); /* keeps rows consistent */
+}
+
+.tt-dcard-footer {
+  margin-top: auto;
+  padding-top: 0.85rem;
+}
+
+.tt-dcard-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+
+  background: #16a34a;
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+
+  box-shadow: 0 14px 30px rgba(22, 163, 74, 0.22);
+  transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.tt-dcard-btn:hover {
+  background: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px rgba(22, 163, 74, 0.28);
+}
+
+.tt-dcard-btn:focus {
+  outline: none;
+}
+
+.tt-dcard-btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25), 0 18px 36px rgba(22, 163, 74, 0.28);
+}

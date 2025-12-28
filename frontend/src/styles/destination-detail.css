@@ -1,0 +1,398 @@
+/* Destination Detail (Redesigned)
+   - Uses existing TT hero (parallax) styles from hero.css
+   - Avoids relying on new Tailwind utilities (project ships a prebuilt index.css)
+*/
+
+.tt-dest-back {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 3;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  cursor: pointer;
+
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.tt-dest-back:hover {
+  background: rgba(0, 0, 0, 0.35);
+  transform: translateY(-1px);
+}
+
+.tt-dest-back:focus {
+  outline: none;
+}
+
+.tt-dest-back:focus-visible {
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.28);
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+.tt-dest-hero-grid {
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .tt-dest-hero-grid {
+    grid-template-columns: 1.25fr 0.75fr;
+    gap: 1.25rem;
+  }
+}
+
+.tt-dest-weather {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 1.1rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.20);
+}
+
+.tt-dest-weather-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 700;
+}
+
+.tt-dest-weather-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.tt-dest-metric {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.tt-dest-metric svg {
+  opacity: 0.95;
+}
+
+.tt-dest-metric-label {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.tt-dest-metric-value {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.tt-dest-section {
+  padding: 4.25rem 0;
+  background: #ffffff;
+}
+
+.tt-dest-section.alt {
+  background: #f8fafc;
+}
+
+.tt-dest-wrap {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.tt-dest-about-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .tt-dest-about-grid {
+    grid-template-columns: 1.35fr 0.65fr;
+  }
+}
+
+.tt-dest-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06);
+  padding: 1.4rem;
+}
+
+.tt-dest-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #0f172a;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+
+.tt-dest-kicker small {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.tt-dest-text {
+  margin: 0;
+  color: #475569;
+  line-height: 1.75;
+}
+
+.tt-dest-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
+}
+
+.tt-dest-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.tt-dest-btn.primary {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.tt-dest-btn.primary:hover {
+  background: #15803d;
+  transform: translateY(-1px);
+}
+
+.tt-dest-btn.ghost {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  color: #0f172a;
+}
+
+.tt-dest-btn.ghost:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.tt-dest-mini {
+  margin: 0.8rem 0 0;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.tt-dest-plan {
+  position: relative;
+  overflow: hidden;
+}
+
+.tt-dest-plan::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px 220px at 20% 0%, rgba(34, 197, 94, 0.12), transparent 55%),
+    radial-gradient(600px 220px at 80% 20%, rgba(59, 130, 246, 0.10), transparent 60%);
+  pointer-events: none;
+}
+
+.tt-dest-plan > * {
+  position: relative;
+}
+
+.tt-dest-plan-title {
+  margin: 0;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.tt-dest-plan-grid {
+  margin-top: 0.9rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.tt-dest-plan-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(241, 245, 249, 0.8);
+  border: 1px solid #e5e7eb;
+}
+
+.tt-dest-plan-item strong {
+  color: #0f172a;
+}
+
+.tt-dest-plan-item span {
+  color: #475569;
+  font-weight: 600;
+}
+
+.tt-dest-cards {
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .tt-dest-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tt-dest-cards {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.tt-dest-location {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 10px 18px rgba(17, 24, 39, 0.05);
+  padding: 1.1rem;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.tt-dest-location:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px rgba(17, 24, 39, 0.08);
+}
+
+.tt-dest-location-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.tt-dest-location-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  flex-shrink: 0;
+}
+
+.tt-dest-location-name {
+  margin: 0;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.tt-dest-location-desc {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.tt-dest-location-tip {
+  margin-top: 0.75rem;
+  color: #64748b;
+  font-size: 0.92rem;
+}
+
+.tt-dest-divider {
+  margin-top: 1.1rem;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.tt-dest-cta {
+  padding: 4.75rem 0;
+  color: #ffffff;
+  background:
+    radial-gradient(1200px 480px at 20% 0%, rgba(34, 197, 94, 0.85), rgba(22, 163, 74, 0.92) 45%, rgba(15, 118, 110, 0.92) 100%),
+    linear-gradient(135deg, #16a34a, #0ea5e9);
+}
+
+.tt-dest-cta-inner {
+  max-width: 56rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.tt-dest-cta-title {
+  margin: 0;
+  font-weight: 900;
+  font-size: 1.6rem;
+}
+
+@media (min-width: 768px) {
+  .tt-dest-cta-title {
+    font-size: 2rem;
+  }
+}
+
+.tt-dest-cta-text {
+  margin: 0.9rem auto 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.75;
+  max-width: 44rem;
+}
+
+.tt-dest-cta-actions {
+  margin-top: 1.4rem;
+  display: flex;
+  justify-content: center;
+}
+
+.tt-dest-cta-btn {
+  background: #ffffff;
+  color: #166534;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  padding: 0.85rem 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.tt-dest-cta-btn:hover {
+  background: rgba(255, 255, 255, 0.92);
+  transform: translateY(-1px);
+}
+
+/* Secondary button variant for the Hero actions on destination pages */
+.tt-hero-btn.tt-hero-btn--ghost {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+}
+
+.tt-hero-btn.tt-hero-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.30);
+}

@@ -1,0 +1,182 @@
+/* HERO BACKDROP */
+.tt-hero {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  color: #ffffff;
+
+  background-image: var(--tt-hero-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* Parallax effect (desktop) */
+  background-attachment: fixed;
+}
+
+/* Overlay for readability */
+.tt-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  /* Stronger on left (where text sits), softer on right */
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.74) 0%,
+    rgba(0, 0, 0, 0.52) 45%,
+    rgba(0, 0, 0, 0.32) 100%
+  );
+}
+
+/* Subtle green glow for brand vibe (very soft) */
+.tt-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+
+  background: radial-gradient(
+    circle at 20% 35%,
+    rgba(34, 197, 94, 0.18) 0%,
+    rgba(0, 0, 0, 0) 55%
+  );
+  opacity: 0.9;
+}
+
+/* Height variants */
+.tt-hero--full { min-height: 100vh; }
+.tt-hero--medium { min-height: 60vh; }
+.tt-hero--small { min-height: 40vh; }
+
+.tt-hero-inner {
+  position: relative;
+  z-index: 1;
+
+  /* navbar-safe padding (your nav is fixed and ~80px tall) */
+  padding-top: 6rem;
+  padding-bottom: 4.25rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Glass panel for clean text placement */
+.tt-hero-panel {
+  width: 100%;
+  max-width: 44rem;
+
+  padding: 1.5rem 1.5rem;
+  border-radius: 20px;
+
+  background: rgba(17, 24, 39, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+
+  text-align: center;
+}
+
+@media (min-width: 900px) {
+  .tt-hero-inner {
+    justify-content: flex-start;
+  }
+  .tt-hero-panel {
+    padding: 2rem 2rem;
+    text-align: left;
+  }
+}
+
+.tt-hero-kicker {
+  margin: 0 0 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.tt-hero-title {
+  margin: 0;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+
+  font-size: 2.4rem;
+  text-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
+@media (min-width: 768px) {
+  .tt-hero-title {
+    font-size: 3.25rem;
+  }
+}
+
+.tt-hero-subtitle {
+  margin: 0.9rem 0 0;
+  max-width: 42rem;
+
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@media (min-width: 768px) {
+  .tt-hero-subtitle {
+    font-size: 1.15rem;
+  }
+}
+
+.tt-hero-actions {
+  margin-top: 1.4rem;
+  display: grid;
+  gap: 0.65rem;
+  max-width: 26rem;
+}
+
+.tt-hero-btn {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+
+  background: #16a34a;
+  border: 1px solid #16a34a;
+  color: #ffffff;
+
+  font-weight: 800;
+  cursor: pointer;
+
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+}
+
+.tt-hero-btn:hover {
+  background: #15803d;
+  border-color: #15803d;
+}
+
+.tt-hero-btn:active {
+  transform: translateY(1px);
+}
+
+.tt-hero-hint {
+  margin: 0;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* Mobile + reduced motion fallback:
+   background-attachment: fixed can be janky on mobile and should respect user preference. */
+@media (max-width: 900px) {
+  .tt-hero {
+    background-attachment: scroll;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-hero {
+    background-attachment: scroll;
+  }
+}

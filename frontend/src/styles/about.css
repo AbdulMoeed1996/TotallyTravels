@@ -1,0 +1,336 @@
+/* About page – match Home page visual language */
+
+.tt-about-intro {
+  padding: 4.75rem 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.tt-about-glow {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  border-radius: 999px;
+  filter: blur(44px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.tt-about-glow--tr {
+  top: -140px;
+  right: -140px;
+  background: rgba(34, 197, 94, 0.28);
+}
+
+.tt-about-glow--bl {
+  bottom: -150px;
+  left: -150px;
+  background: rgba(34, 197, 94, 0.22);
+}
+
+.tt-about-wrap {
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.tt-about-intro-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 980px) {
+  .tt-about-intro-grid {
+    grid-template-columns: 5fr 7fr;
+    gap: 2rem;
+  }
+}
+
+.tt-about-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  background: rgba(236, 253, 245, 0.9);
+  border: 1px solid #d1fae5;
+  color: #111827;
+  box-shadow: 0 10px 20px rgba(17, 24, 39, 0.05);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.tt-about-pillIcon {
+  color: #16a34a;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.tt-about-headline {
+  margin: 1.05rem 0 0;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.15;
+}
+
+@media (min-width: 720px) {
+  .tt-about-headline {
+    font-size: 2.35rem;
+  }
+}
+
+.tt-about-paragraph {
+  margin: 0.85rem 0 0;
+  color: #374151;
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+.tt-about-chips {
+  margin-top: 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tt-about-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #374151;
+  font-weight: 650;
+  font-size: 0.9rem;
+}
+
+.tt-about-highlights {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 720px) {
+  .tt-about-highlights {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.tt-about-card {
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 10px 20px rgba(17, 24, 39, 0.05);
+  padding: 1.25rem;
+}
+
+.tt-about-cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tt-about-iconPill {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid #d1fae5;
+  background: #ecfdf5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.tt-about-icon {
+  width: 22px;
+  height: 22px;
+  color: #16a34a;
+}
+
+.tt-about-cardTitle {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 850;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.tt-about-cardText {
+  margin: 0.6rem 0 0;
+  color: #374151;
+  line-height: 1.65;
+}
+
+.tt-about-mission {
+  grid-column: 1 / -1;
+  border-radius: 18px;
+  padding: 1.35rem 1.35rem;
+  color: #ffffff;
+  background: radial-gradient(
+      1200px 220px at 10% 10%,
+      rgba(34, 197, 94, 0.20),
+      transparent 55%
+    ),
+    linear-gradient(135deg, #0b1220 0%, #111827 70%, #0b1220 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 26px rgba(17, 24, 39, 0.18);
+}
+
+.tt-about-missionKicker {
+  margin: 0;
+  opacity: 0.85;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.tt-about-missionText {
+  margin: 0.6rem 0 0;
+  font-size: 1.06rem;
+  line-height: 1.65;
+}
+
+/* Generic section style */
+.tt-about-section {
+  padding: 4.5rem 0;
+  background: #ffffff;
+}
+
+.tt-about-section--alt {
+  background: #f9fafb;
+}
+
+.tt-about-header {
+  text-align: center;
+  max-width: 52rem;
+  margin: 0 auto 2.25rem;
+}
+
+.tt-about-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 850;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.tt-about-subtitle {
+  margin: 0.75rem 0 0;
+  color: #6b7280;
+  line-height: 1.65;
+}
+
+.tt-about-grid3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 900px) {
+  .tt-about-grid3 {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+  }
+}
+
+/* Values list */
+.tt-about-valuesList {
+  list-style: none;
+  padding: 0;
+  margin: 0.85rem 0 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.tt-about-valuesItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  color: #374151;
+  line-height: 1.55;
+}
+
+.tt-about-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #16a34a;
+  margin-top: 0.5rem;
+  flex: 0 0 auto;
+}
+
+/* CTA */
+.tt-about-ctaCard {
+  max-width: 72rem;
+  margin: 0 auto;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #f9fafb 0%, #ffffff 65%);
+  box-shadow: 0 10px 20px rgba(17, 24, 39, 0.05);
+  padding: 2.25rem 1.5rem;
+  text-align: center;
+}
+
+@media (min-width: 720px) {
+  .tt-about-ctaCard {
+    padding: 2.6rem 2.2rem;
+  }
+}
+
+.tt-about-actions {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 720px) {
+  .tt-about-actions {
+    flex-direction: row;
+  }
+}
+
+.tt-about-btn {
+  border-radius: 14px;
+  padding: 0.95rem 1.2rem;
+  font-weight: 850;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  min-width: 220px;
+}
+
+.tt-about-btn:active {
+  transform: translateY(1px);
+}
+
+.tt-about-btnPrimary {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: #16a34a;
+}
+
+.tt-about-btnPrimary:hover {
+  background: #15803d;
+  border-color: #15803d;
+}
+
+.tt-about-btnSecondary {
+  background: #ffffff;
+  color: #111827;
+  border-color: #e5e7eb;
+}
+
+.tt-about-btnSecondary:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
