@@ -171,7 +171,7 @@ function normalizeTravelers(body) {
   return '';
 }
 
-const VALID_TRANSPORT_OPTIONS = ['Sedan', 'Crossover', 'SUV', 'Coaster'];
+const VALID_TRANSPORT_OPTIONS = ['Sedan', 'Crossover', 'SUV', 'Coaster', 'By Air'];
 const VALID_ACCOMMODATION_TYPES = ['Standard', 'Deluxe', 'Luxury'];
 
 function normalizeTransportOption(body) {
