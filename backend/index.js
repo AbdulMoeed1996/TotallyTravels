@@ -23,10 +23,15 @@ const allowedProdOrigins = new Set([...defaultAllowedOrigins, ...envAllowedOrigi
 const corsOptions = {
   origin: (origin, cb) => {
     if (!origin) return cb(null, true);
+
+    // Allow local dev
     if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
       return cb(null, true);
     }
+
+    // Allow production domains
     if (allowedProdOrigins.has(origin)) return cb(null, true);
+
     return cb(new Error(`CORS blocked for origin: ${origin}`));
   },
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -64,7 +69,6 @@ function toCleanString(v) {
 /**
  * Pretty format for date-only values:
  * "2026-01-05" -> "05 Jan 2026"
- *
  * Uses UTC to avoid timezone shifting the date.
  */
 function formatPrettyDate(dateStr) {
@@ -75,7 +79,6 @@ function formatPrettyDate(dateStr) {
   const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (isoMatch) {
     const dt = new Date(`${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}T00:00:00Z`);
-    // "05 Jan 2026"
     return new Intl.DateTimeFormat('en-GB', {
       day: '2-digit',
       month: 'short',
@@ -84,7 +87,6 @@ function formatPrettyDate(dateStr) {
     }).format(dt);
   }
 
-  // If it isn't ISO, just return original string
   return s;
 }
 
@@ -98,7 +100,7 @@ function formatPrettyDate(dateStr) {
 function formatPreferredDates(body) {
   const direct = body?.dates;
 
-  // 1) dates as string: try to extract ISO dates from it
+  // 1) dates as string
   if (typeof direct === 'string') {
     const raw = direct.trim();
     const matches = raw.match(/\d{4}-\d{2}-\d{2}/g);
@@ -154,22 +156,39 @@ function normalizeDestinations(body) {
   const d1 = body?.destinations;
   if (typeof d1 === 'string') return d1.trim();
   if (Array.isArray(d1)) return d1.map((x) => toCleanString(x)).filter(Boolean).join(', ');
+
   const d2 = body?.destination;
   if (typeof d2 === 'string') return d2.trim();
   if (Array.isArray(d2)) return d2.map((x) => toCleanString(x)).filter(Boolean).join(', ');
+
   return '';
 }
 
 function normalizeTravelers(body) {
-  const t =
-    body?.travelers ??
-    body?.numberOfPeople ??
-    body?.travellers ??
-    body?.people;
-
+  const t = body?.travelers ?? body?.numberOfPeople ?? body?.travellers ?? body?.people;
   const n = Number(t);
   if (Number.isFinite(n) && n > 0) return n;
   return '';
+}
+
+const VALID_TRANSPORT_OPTIONS = ['Sedan', 'Crossover', 'SUV', 'Coaster'];
+const VALID_ACCOMMODATION_TYPES = ['Standard', 'Deluxe', 'Luxury'];
+
+function normalizeTransportOption(body) {
+  const t = body?.transportOption ?? body?.transportType ?? body?.transport;
+  return toCleanString(t);
+}
+
+function normalizeAccommodationType(body) {
+  const a = body?.accommodationType ?? body?.accommodation ?? body?.hotelType;
+  return toCleanString(a);
+}
+
+function matchAllowedCaseInsensitive(val, allowed) {
+  const v = toCleanString(val);
+  if (!v) return '';
+  const hit = allowed.find((x) => x.toLowerCase() === v.toLowerCase());
+  return hit || '';
 }
 
 /* ------------------- Health ------------------- */
@@ -192,7 +211,8 @@ app.post('/api/contact', async (req, res) => {
     if (!emailIsConfigured()) {
       return res.status(500).json({
         success: false,
-        error: 'Email is not configured on the server. Set GMAIL_USER, GMAIL_PASS (and optionally CONTACT_TO).',
+        error:
+          'Email is not configured on the server. Set GMAIL_USER, GMAIL_PASS (and optionally CONTACT_TO).',
       });
     }
 
@@ -232,21 +252,57 @@ app.post('/api/book', async (req, res) => {
     const destinationsText = normalizeDestinations(body);
     const travelers = normalizeTravelers(body);
 
-    if (!name || !email || !phone || !destinationsText || !preferredDates || !travelers) {
+    const transportOptionRaw = normalizeTransportOption(body);
+    const accommodationTypeRaw = normalizeAccommodationType(body);
+
+    const missing = [];
+    if (!name) missing.push('name');
+    if (!email) missing.push('email');
+    if (!phone) missing.push('phone');
+    if (!preferredDates) missing.push('dates');
+    if (!destinationsText) missing.push('destinations');
+    if (!travelers) missing.push('travelers');
+    if (!transportOptionRaw) missing.push('transportOption');
+    if (!accommodationTypeRaw) missing.push('accommodationType');
+
+    if (missing.length > 0) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: name, email, phone, dates, destinations, travelers',
+        error: `Missing required fields: ${missing.join(', ')}`,
+      });
+    }
+
+    const transportOption = matchAllowedCaseInsensitive(
+      transportOptionRaw,
+      VALID_TRANSPORT_OPTIONS
+    );
+    if (!transportOption) {
+      return res.status(400).json({
+        success: false,
+        error: `Invalid transport option. Allowed: ${VALID_TRANSPORT_OPTIONS.join(', ')}`,
+      });
+    }
+
+    const accommodationType = matchAllowedCaseInsensitive(
+      accommodationTypeRaw,
+      VALID_ACCOMMODATION_TYPES
+    );
+    if (!accommodationType) {
+      return res.status(400).json({
+        success: false,
+        error: `Invalid accommodation type. Allowed: ${VALID_ACCOMMODATION_TYPES.join(', ')}`,
       });
     }
 
     if (!emailIsConfigured()) {
       return res.status(500).json({
         success: false,
-        error: 'Email is not configured on the server. Set GMAIL_USER, GMAIL_PASS (and optionally CONTACT_TO).',
+        error:
+          'Email is not configured on the server. Set GMAIL_USER, GMAIL_PASS (and optionally CONTACT_TO).',
       });
     }
 
-    const message = toCleanString(body.message) || '(No additional message)';
+    const bookingMessage = toCleanString(body.message) || '(No additional message)';
 
     await transporter.sendMail({
       from: `"Totally Travels Website" <${MAIL_USER}>`,
@@ -262,9 +318,11 @@ Phone: ${phone}
 Preferred Dates: ${preferredDates}
 Destinations: ${destinationsText}
 Number of Travelers: ${travelers}
+Transport Type: ${transportOption}
+Accommodation Type: ${accommodationType}
 
 Message:
-${message}
+${bookingMessage}
       `.trim(),
     });
 
@@ -286,35 +344,64 @@ const CITY_COORDS = {
 
 function weatherCodeToText(code) {
   switch (Number(code)) {
-    case 0: return 'Clear sky';
-    case 1: return 'Mainly clear';
-    case 2: return 'Partly cloudy';
-    case 3: return 'Overcast';
-    case 45: return 'Fog';
-    case 48: return 'Rime fog';
-    case 51: return 'Light drizzle';
-    case 53: return 'Moderate drizzle';
-    case 55: return 'Dense drizzle';
-    case 56: return 'Light freezing drizzle';
-    case 57: return 'Dense freezing drizzle';
-    case 61: return 'Light rain';
-    case 63: return 'Moderate rain';
-    case 65: return 'Heavy rain';
-    case 66: return 'Light freezing rain';
-    case 67: return 'Heavy freezing rain';
-    case 71: return 'Light snowfall';
-    case 73: return 'Moderate snowfall';
-    case 75: return 'Heavy snowfall';
-    case 77: return 'Snow grains';
-    case 80: return 'Light rain showers';
-    case 81: return 'Moderate rain showers';
-    case 82: return 'Violent rain showers';
-    case 85: return 'Light snow showers';
-    case 86: return 'Heavy snow showers';
-    case 95: return 'Thunderstorm';
-    case 96: return 'Thunderstorm with hail';
-    case 99: return 'Thunderstorm with heavy hail';
-    default: return 'Unknown';
+    case 0:
+      return 'Clear sky';
+    case 1:
+      return 'Mainly clear';
+    case 2:
+      return 'Partly cloudy';
+    case 3:
+      return 'Overcast';
+    case 45:
+      return 'Fog';
+    case 48:
+      return 'Rime fog';
+    case 51:
+      return 'Light drizzle';
+    case 53:
+      return 'Moderate drizzle';
+    case 55:
+      return 'Dense drizzle';
+    case 56:
+      return 'Light freezing drizzle';
+    case 57:
+      return 'Dense freezing drizzle';
+    case 61:
+      return 'Light rain';
+    case 63:
+      return 'Moderate rain';
+    case 65:
+      return 'Heavy rain';
+    case 66:
+      return 'Light freezing rain';
+    case 67:
+      return 'Heavy freezing rain';
+    case 71:
+      return 'Light snowfall';
+    case 73:
+      return 'Moderate snowfall';
+    case 75:
+      return 'Heavy snowfall';
+    case 77:
+      return 'Snow grains';
+    case 80:
+      return 'Light rain showers';
+    case 81:
+      return 'Moderate rain showers';
+    case 82:
+      return 'Violent rain showers';
+    case 85:
+      return 'Light snow showers';
+    case 86:
+      return 'Heavy snow showers';
+    case 95:
+      return 'Thunderstorm';
+    case 96:
+      return 'Thunderstorm with hail';
+    case 99:
+      return 'Thunderstorm with heavy hail';
+    default:
+      return 'Unknown';
   }
 }
 
@@ -326,10 +413,12 @@ const WEATHER_TTL_MS = 5 * 60 * 1000;
 function cacheGet(map, key, ttlMs) {
   const hit = map.get(key);
   if (!hit) return null;
+
   if (Date.now() - hit.ts > ttlMs) {
     map.delete(key);
     return null;
   }
+
   return hit.value;
 }
 
@@ -392,7 +481,6 @@ async function fetchCurrentWeather(latitude, longitude) {
 
   const weatherData = await weatherResp.json();
   const current = weatherData?.current;
-
   if (!current) throw new Error('Weather data missing current conditions');
 
   cacheSet(weatherCache, key, current);
